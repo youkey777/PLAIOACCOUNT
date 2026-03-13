@@ -15,6 +15,20 @@ const el = (tag, cls, html = '') => {
 const fmt = n => '¥' + Number(n).toLocaleString('ja-JP');
 const fmtPt = n => Number(n).toLocaleString('ja-JP') + 'pt';
 
+/* ---- メンバー/プラン色分け ---- */
+const MEMBER_COLORS = ['#6C5CE7', '#e17055', '#00b894', '#0984e3', '#d63031', '#fdcb6e', '#6c5ce7', '#00cec9'];
+const PLAN_COLORS = { 'voice': '#6C5CE7', 'data': '#0984e3', 'kake': '#e17055', 'wimax': '#00b894', 'care': '#d63031' };
+function getMemberColor(memberId) {
+  if (memberId === 'owner') return MEMBER_COLORS[0];
+  const idx = STATE.familyMembers.findIndex(m => m.id === memberId);
+  return MEMBER_COLORS[(idx + 1) % MEMBER_COLORS.length];
+}
+function getPlanColor(planId) {
+  if (!planId) return '#374151';
+  const prefix = planId.split('-')[0];
+  return PLAN_COLORS[prefix] || '#374151';
+}
+
 /* ---- トースト通知 ---- */
 function showToast(message, duration = 3000) {
   const toast = document.createElement('div');
@@ -551,13 +565,15 @@ function renderPointsDetail(container, visibleMembers) {
           <span class="member-avatar-sm">${m.avatar}</span>
           <strong>${m.name}</strong>
         </div>
-        <div style="text-align:right;">
-          <span class="fw-700">${fmtPt(pts)}</span>
-          <small class="text-gray"> (${(pts / 10).toLocaleString('ja-JP')}円相当)</small>
+        <div class="flex-center" style="gap:10px;">
+          <div style="text-align:right;">
+            <span class="fw-700">${fmtPt(pts)}</span>
+            <small class="text-gray"> (${(pts / 10).toLocaleString('ja-JP')}円相当)</small>
+          </div>
+          <span class="point-member-arrow">›</span>
         </div>
       </div>
     `;
-    card.style.cursor = 'pointer';
     card.onclick = () => navigate('points/member', { id: m.id });
     memSec.appendChild(card);
   }
@@ -1238,13 +1254,13 @@ function renderServicePage(container, serviceType, cfg) {
 
   // 【修正3】タイトル・説明文を上書き
   if (serviceType === 'SIM') {
-    if (hasContracts) { cfg.title = 'SIMサービスマイページ'; cfg.desc = 'PLAIO SIMのサービスのマイページです'; }
+    if (hasContracts) { cfg.title = 'SIMサービス マイページ'; cfg.desc = 'PLAIO SIMのサービスのマイページです'; }
   } else if (serviceType === 'WiMAX') {
-    if (hasContracts) { cfg.title = 'WiMAXマイページ'; cfg.desc = 'PLAIO WiMAXのマイページが表示されます'; }
-    else { cfg.title = 'WiMAXの販売サービス商品ページ'; }
+    if (hasContracts) { cfg.title = 'WiMAX マイページ'; cfg.desc = 'PLAIO WiMAXのマイページが表示されます'; }
+    else { cfg.title = 'WiMAXの販売サービス 商品ページ'; }
   } else if (serviceType === 'スマホケア') {
-    if (hasContracts) { cfg.title = 'スマホケアマイページ'; }
-    else { cfg.title = 'スマホケア商品ページ'; }
+    if (hasContracts) { cfg.title = 'スマホケア マイページ'; }
+    else { cfg.title = 'スマホケア 商品ページ'; }
   }
 
   // 【修正1】契約単位でオプションを生成
@@ -1313,8 +1329,15 @@ function renderServicePage(container, serviceType, cfg) {
     sel.onchange = () => {
       const [memberId, svcIdx] = sel.value.split(':');
       const m = members.find(x => x.id === memberId);
-      contentArea.innerHTML = '';
-      if (m) renderContractView(contentArea, m, serviceType, cfg, +svcIdx);
+      contentArea.style.opacity = '0';
+      contentArea.style.transform = 'translateY(8px)';
+      setTimeout(() => {
+        contentArea.innerHTML = '';
+        if (m) renderContractView(contentArea, m, serviceType, cfg, +svcIdx);
+        contentArea.style.transition = 'opacity .3s ease, transform .3s ease';
+        contentArea.style.opacity = '1';
+        contentArea.style.transform = 'translateY(0)';
+      }, 150);
     };
   }
 
@@ -1346,7 +1369,7 @@ function renderContractView(area, member, serviceType, cfg, svcIdx) {
     const svc = member.services['SIM'][svcIdx] || member.services['SIM'][0];
     area.innerHTML = `
       <div class="svc-image-page">
-        <div class="svc-image-caption">${member.name}さんの ${svc ? svc.planName + 'プラン' : 'SIM'} のマイページ</div>
+        <div class="svc-image-caption"><span class="caption-name" style="color:${getMemberColor(member.id)}">${member.name}</span>さんの <span class="caption-plan" style="color:${getPlanColor(svc ? svc.planId : '')}">${svc ? svc.planName + 'プラン' : 'SIM'}</span> のマイページ</div>
         <img src="img-sim-mypage.png" alt="SIMマイページ" class="svc-page-screenshot">
       </div>
     `;
@@ -1362,8 +1385,8 @@ function renderContractView(area, member, serviceType, cfg, svcIdx) {
       : (mainSvc ? mainSvc.planName : '契約なし');
 
     const banner = el('div', 'maimo-banner', `
-      <div style="font-size:13px;opacity:0.85;margin-bottom:4px;">${member.name}さんの${serviceType}契約</div>
-      <div style="font-size:20px;font-weight:700;">${displayPlanName}</div>
+      <div style="font-size:13px;margin-bottom:4px;"><span style="font-weight:700;background:rgba(255,255,255,.25);padding:1px 6px;border-radius:4px;">${member.name}</span>さんの${serviceType}契約</div>
+      <div style="font-size:20px;font-weight:700;background:rgba(255,255,255,.15);display:inline-block;padding:2px 10px;border-radius:6px;">${displayPlanName}</div>
       <div style="font-size:15px;margin-top:4px;">${fmt(total)}<span style="font-size:12px;">/月</span></div>
     `);
     banner.style.background = cfg.color.grad;
