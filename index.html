@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLAIO マイページ</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     ログインページ（サイドバーなし）
+     ============================================================ -->
+<div id="page-login">
+  <div class="login-card">
+    <div class="login-logo">PLAIO</div>
+    <div class="login-subtitle">PLAIOアカウントを作成する</div>
+
+    <div class="form-group">
+      <label class="form-label">メールアドレス</label>
+      <input id="login-email" class="form-input" type="email" placeholder="example@email.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">パスワード</label>
+      <input id="login-password" class="form-input" type="password" placeholder="パスワードを入力">
+    </div>
+
+    <button id="btn-login" class="btn-primary">作成する</button>
+
+    <div class="demo-section">
+      <p>デモアカウント</p>
+      <button id="btn-demo-yamada" class="btn-demo">山田太郎（スキップ）</button>
+      <div class="demo-hint">全ステップをスキップしてダッシュボードへ</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     メインアプリ（サイドバー + コンテンツ）
+     ============================================================ -->
+<div id="app">
+  <!-- サイドバー -->
+  <aside id="app-sidebar" class="sidebar" style="display:none;"></aside>
+
+  <!-- メインコンテンツ -->
+  <main id="main-wrap" class="main-wrap" style="display:none;">
+    <div id="main-content"></div>
+  </main>
+</div>
+
+<!-- モーダルオーバーレイ（全画面共通） -->
+<div id="modal-overlay" class="modal-overlay"></div>
+
+<!-- スクリプト -->
+<script src="data.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
