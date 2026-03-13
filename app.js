@@ -220,44 +220,12 @@ function renderSidebar() {
    ============================================================ */
 function renderLogin() {
   const card = $('.login-card');
+
   if (STATE.loginStep === 0) {
+    // Step 0: 既存サービスのログイン画面
     card.innerHTML = `
       <div class="login-logo">PLAIO</div>
-      <div class="login-subtitle">PLAIOアカウントを作成する</div>
-      <button id="btn-login" class="btn-primary">作成する</button>
-    `;
-    $('#btn-login').addEventListener('click', () => {
-      STATE.loginStep = 1;
-      renderLogin();
-    });
-  } else if (STATE.loginStep === 1) {
-    card.innerHTML = `
-      <div class="login-logo">PLAIO</div>
-      <div class="login-subtitle">PLAIOアカウントのID・パスワードを設定</div>
-      <p style="color:#6b7280;text-align:center;margin:4px 0 20px;font-size:13px;">このIDとパスワードでPLAIOにログインします。</p>
-      <div class="form-group">
-        <label class="form-label">ユーザーID</label>
-        <input id="reg-userid" class="form-input" type="text" placeholder="yamada" value="yamada">
-      </div>
-      <div class="form-group">
-        <label class="form-label">パスワード</label>
-        <input id="reg-password" class="form-input" type="text" placeholder="パスワードを設定" value="12345">
-      </div>
-      <button id="btn-next-step" class="btn-primary">次へ</button>
-    `;
-    $('#btn-next-step').addEventListener('click', () => {
-      STATE._plaioCredentials = {
-        userId: $('#reg-userid').value || 'yamada',
-        password: $('#reg-password').value || '12345',
-      };
-      STATE.loginStep = 2;
-      renderLogin();
-    });
-  } else if (STATE.loginStep === 2) {
-    card.innerHTML = `
-      <div class="login-logo">PLAIO</div>
-      <div class="login-subtitle">お使いのサービスでログイン</div>
-      <p style="color:#6b7280;text-align:center;margin:4px 0 20px;font-size:13px;">お使いのサービスのID・パスワードを入力してください。<br>PLAIOアカウントに紐づけられます。</p>
+      <div class="login-subtitle">サービスにログインする</div>
       <div class="form-group">
         <label class="form-label">サービス種別</label>
         <select id="svc-type" class="form-input">
@@ -274,12 +242,73 @@ function renderLogin() {
         <label class="form-label">パスワード</label>
         <input id="svc-password" class="form-input" type="text" placeholder="パスワード" value="12345">
       </div>
-      <button id="btn-do-login" class="btn-primary">アカウントを作成して紐づける</button>
+      <button id="btn-svc-login" class="btn-primary">ログインする</button>
     `;
-    $('#btn-do-login').addEventListener('click', () => {
+    $('#btn-svc-login').addEventListener('click', () => {
       STATE._serviceLogin = {
         serviceType: $('#svc-type').value,
         userId: $('#svc-userid').value,
+      };
+      STATE.loginStep = 1;
+      renderLogin();
+    });
+
+  } else if (STATE.loginStep === 1) {
+    // Step 1: サービスのマイページ（擬似）
+    const svcType = (STATE._serviceLogin || {}).serviceType || 'SIM';
+    const svcUserId = (STATE._serviceLogin || {}).userId || 'sim_user01';
+    const svcMeta = {
+      SIM:      { icon: '📱', color: SERVICE_COLORS.SIM.grad,      title: 'SIMサービス マイページ',    plan: '50GB 音声SIMプラン', usage: 'データ残量: 38.2GB / 50GB' },
+      WiMAX:    { icon: '📶', color: SERVICE_COLORS.WiMAX.grad,    title: 'WiMAXサービス マイページ',  plan: 'ギガ放題プラスプラン',   usage: '今月の使用量: 122GB' },
+      スマホケア: { icon: '🛡️', color: SERVICE_COLORS.スマホケア.grad, title: 'スマホケア マイページ', plan: 'スマホケアゴールドプラン', usage: '保証利用回数: 0回 / 2回' },
+    };
+    const m = svcMeta[svcType] || svcMeta.SIM;
+    card.innerHTML = `
+      <div class="svc-mypage-banner" style="background:${m.color};color:#fff;border-radius:12px;padding:20px;margin-bottom:20px;text-align:center;">
+        <div style="font-size:24px;margin-bottom:4px;">${m.icon}</div>
+        <div style="font-size:16px;font-weight:700;">${m.title}</div>
+        <div style="font-size:13px;opacity:.85;margin-top:4px;">${svcUserId} さん、ようこそ</div>
+      </div>
+      <div style="background:#f9fafb;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#374151;">
+        <div style="margin-bottom:8px;"><span style="color:#6b7280;">ご契約プラン</span><br><strong>${m.plan}</strong></div>
+        <div><span style="color:#6b7280;">ご利用状況</span><br><strong>${m.usage}</strong></div>
+      </div>
+      <div style="background:#eef2ff;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#4338ca;border:1px solid #c7d2fe;">
+        💡 複数のサービスをひとつのアカウントでまとめて管理できる <strong>PLAIOアカウント</strong> を作成しませんか？
+      </div>
+      <button id="btn-create-plaio" class="btn-primary">PLAIOアカウントを作成する</button>
+    `;
+    $('#btn-create-plaio').addEventListener('click', () => {
+      STATE.loginStep = 2;
+      renderLogin();
+    });
+
+  } else if (STATE.loginStep === 2) {
+    // Step 2: PLAIOアカウント作成説明 + ID/PW入力
+    card.innerHTML = `
+      <div class="login-logo">PLAIO</div>
+      <div class="login-subtitle">PLAIOアカウントを作成する</div>
+      <div style="background:#f9fafb;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#374151;">
+        <div style="font-weight:700;margin-bottom:8px;color:#111;">PLAIOアカウントとは？</div>
+        <div style="margin-bottom:6px;">✅ SIM・WiMAX・スマホケアをまとめて管理</div>
+        <div style="margin-bottom:6px;">✅ ポイントを一括で確認・交換</div>
+        <div>✅ 家族のプランも一画面で把握</div>
+      </div>
+      <p style="color:#6b7280;font-size:12px;text-align:center;margin:0 0 16px;">ログインに使用したサービスは自動で紐づけられます。</p>
+      <div class="form-group">
+        <label class="form-label">PLAIO ID（ユーザーID）</label>
+        <input id="plaio-userid" class="form-input" type="text" placeholder="yamada" value="yamada">
+      </div>
+      <div class="form-group">
+        <label class="form-label">パスワード</label>
+        <input id="plaio-password" class="form-input" type="text" placeholder="パスワードを設定" value="12345">
+      </div>
+      <button id="btn-create-account" class="btn-primary">PLAIOアカウントを作成する</button>
+    `;
+    $('#btn-create-account').addEventListener('click', () => {
+      STATE._plaioCredentials = {
+        userId: $('#plaio-userid').value || 'yamada',
+        password: $('#plaio-password').value || '12345',
       };
       setupInitialService();
       location.hash = '#/dashboard';
