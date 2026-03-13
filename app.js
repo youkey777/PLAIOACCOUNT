@@ -257,11 +257,11 @@ function renderLogin() {
       </div>
       <div class="form-group">
         <label class="form-label">ユーザーID</label>
-        <input id="reg-userid" class="form-input" type="text" placeholder="yamada_taro" value="yamada_taro">
+        <input id="reg-userid" class="form-input" type="text" placeholder="yamada" value="yamada">
       </div>
       <div class="form-group">
         <label class="form-label">パスワード</label>
-        <input id="reg-password" class="form-input" type="password" placeholder="パスワードを設定" value="password123">
+        <input id="reg-password" class="form-input" type="text" placeholder="パスワードを設定" value="12345">
       </div>
       <button id="btn-register" class="btn-primary">アカウントを作成する</button>
     `;
@@ -271,7 +271,7 @@ function renderLogin() {
         address: $('#reg-address').value || '東京都渋谷区神宮前1-2-3',
         gender: $('#reg-gender').value || '男性',
         birthday: $('#reg-birthday').value || '1990-05-15',
-        userId: $('#reg-userid').value || 'yamada_taro',
+        userId: $('#reg-userid').value || 'yamada',
       };
       STATE.loginStep = 2;
       renderLogin();
