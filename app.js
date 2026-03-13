@@ -220,9 +220,12 @@ function renderSidebar() {
    ============================================================ */
 function renderLogin() {
   const card = $('.login-card');
+  const page = $('#page-login');
 
   if (STATE.loginStep === 0) {
-    // Step 0: 既存サービスのログイン画面
+    // Step 0: 既存サービスのログイン — デフォルトのloginカードスタイルに戻す
+    page.style.cssText = '';
+    card.style.cssText = '';
     card.innerHTML = `
       <div class="login-logo">PLAIO</div>
       <div class="login-subtitle">サービスにログインする</div>
@@ -254,57 +257,67 @@ function renderLogin() {
     });
 
   } else if (STATE.loginStep === 1) {
-    // Step 1: サービスのマイページ（擬似）
+    // Step 1: PLAIOアカウント作成 — マイページ風の全画面レイアウト
     const svcType = (STATE._serviceLogin || {}).serviceType || 'SIM';
     const svcUserId = (STATE._serviceLogin || {}).userId || 'sim_user01';
-    const svcMeta = {
-      SIM:      { icon: '📱', color: SERVICE_COLORS.SIM.grad,      title: 'SIMサービス マイページ',    plan: '50GB 音声SIMプラン', usage: 'データ残量: 38.2GB / 50GB' },
-      WiMAX:    { icon: '📶', color: SERVICE_COLORS.WiMAX.grad,    title: 'WiMAXサービス マイページ',  plan: 'ギガ放題プラスプラン',   usage: '今月の使用量: 122GB' },
-      スマホケア: { icon: '🛡️', color: SERVICE_COLORS.スマホケア.grad, title: 'スマホケア マイページ', plan: 'スマホケアゴールドプラン', usage: '保証利用回数: 0回 / 2回' },
-    };
-    const m = svcMeta[svcType] || svcMeta.SIM;
+
+    // #page-login をアプリ内ページ風に変える
+    page.style.cssText = 'display:block; background:#f3f4f6; min-height:100vh; padding:0;';
+    // .login-card を透明全幅コンテナに変える
+    card.style.cssText = 'width:100%; max-width:100%; border-radius:0; box-shadow:none; padding:0; background:transparent;';
+
     card.innerHTML = `
-      <div class="svc-mypage-banner" style="background:${m.color};color:#fff;border-radius:12px;padding:20px;margin-bottom:20px;text-align:center;">
-        <div style="font-size:24px;margin-bottom:4px;">${m.icon}</div>
-        <div style="font-size:16px;font-weight:700;">${m.title}</div>
-        <div style="font-size:13px;opacity:.85;margin-top:4px;">${svcUserId} さん、ようこそ</div>
+      <!-- 紫グラデーションのトップバー -->
+      <div style="background:linear-gradient(135deg,#6C5CE7 0%,#a29bfe 100%);padding:14px 32px;display:flex;align-items:center;gap:16px;box-shadow:0 2px 8px rgba(108,92,231,.3);">
+        <div style="color:#fff;font-size:22px;font-weight:900;letter-spacing:1px;">PLAIO</div>
+        <div style="color:rgba(255,255,255,.6);font-size:14px;">|</div>
+        <div style="color:rgba(255,255,255,.9);font-size:14px;">アカウント設定</div>
+        <div style="margin-left:auto;color:rgba(255,255,255,.8);font-size:13px;">${svcType} ID: ${svcUserId}</div>
       </div>
-      <div style="background:#f9fafb;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#374151;">
-        <div style="margin-bottom:8px;"><span style="color:#6b7280;">ご契約プラン</span><br><strong>${m.plan}</strong></div>
-        <div><span style="color:#6b7280;">ご利用状況</span><br><strong>${m.usage}</strong></div>
+
+      <!-- コンテンツエリア -->
+      <div style="max-width:580px;margin:40px auto;padding:0 24px;">
+        <a href="javascript:void(0)" id="btn-back-step0" style="color:#6C5CE7;font-size:13px;display:inline-flex;align-items:center;gap:4px;margin-bottom:24px;text-decoration:none;">← サービスログインに戻る</a>
+
+        <!-- メインカード -->
+        <div style="background:#fff;border-radius:16px;padding:32px;box-shadow:0 2px 12px rgba(0,0,0,.08);">
+          <h2 style="font-size:20px;font-weight:800;color:#111;margin:0 0 6px;">PLAIOアカウントを作成する</h2>
+          <p style="color:#6b7280;font-size:13px;margin:0 0 24px;">複数のサービスをひとつのアカウントで管理できます。</p>
+
+          <!-- メリット -->
+          <div style="background:#f0fdf4;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#166534;">
+            <div style="font-weight:700;margin-bottom:10px;">💡 PLAIOアカウントとは？</div>
+            <div style="margin-bottom:6px;">✅ SIM・WiMAX・スマホケアをまとめて管理</div>
+            <div style="margin-bottom:6px;">✅ ポイントを一括で確認・交換</div>
+            <div>✅ 家族のプランも一画面で把握</div>
+          </div>
+
+          <!-- 注意事項 -->
+          <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px 16px;margin-bottom:24px;font-size:13px;color:#9a3412;">
+            <div style="font-weight:700;margin-bottom:6px;">⚠️ ご注意</div>
+            ここで設定するIDとパスワードは、<strong>新しく作るPLAIOアカウント専用</strong>です。<br>
+            先ほどログインした ${svcType} サービスのIDとは<strong>異なります</strong>。
+          </div>
+
+          <!-- フォーム -->
+          <div class="form-group">
+            <label class="form-label">PLAIO ID（ユーザーID）</label>
+            <input id="plaio-userid" class="form-input" type="text" placeholder="yamada" value="yamada">
+          </div>
+          <div class="form-group">
+            <label class="form-label">パスワード</label>
+            <input id="plaio-password" class="form-input" type="text" placeholder="パスワードを設定" value="12345">
+          </div>
+          <p style="color:#9ca3af;font-size:12px;margin:0 0 20px;">ログインに使用した${svcType}アカウントは自動で紐づけられます。</p>
+          <button id="btn-create-account" class="btn-primary" style="width:100%;">PLAIOアカウントを作成する</button>
+        </div>
       </div>
-      <div style="background:#eef2ff;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#4338ca;border:1px solid #c7d2fe;">
-        💡 複数のサービスをひとつのアカウントでまとめて管理できる <strong>PLAIOアカウント</strong> を作成しませんか？
-      </div>
-      <button id="btn-create-plaio" class="btn-primary">PLAIOアカウントを作成する</button>
     `;
-    $('#btn-create-plaio').addEventListener('click', () => {
-      STATE.loginStep = 2;
+
+    $('#btn-back-step0').addEventListener('click', () => {
+      STATE.loginStep = 0;
       renderLogin();
     });
-
-  } else if (STATE.loginStep === 2) {
-    // Step 2: PLAIOアカウント作成説明 + ID/PW入力
-    card.innerHTML = `
-      <div class="login-logo">PLAIO</div>
-      <div class="login-subtitle">PLAIOアカウントを作成する</div>
-      <div style="background:#f9fafb;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#374151;">
-        <div style="font-weight:700;margin-bottom:8px;color:#111;">PLAIOアカウントとは？</div>
-        <div style="margin-bottom:6px;">✅ SIM・WiMAX・スマホケアをまとめて管理</div>
-        <div style="margin-bottom:6px;">✅ ポイントを一括で確認・交換</div>
-        <div>✅ 家族のプランも一画面で把握</div>
-      </div>
-      <p style="color:#6b7280;font-size:12px;text-align:center;margin:0 0 16px;">ログインに使用したサービスは自動で紐づけられます。</p>
-      <div class="form-group">
-        <label class="form-label">PLAIO ID（ユーザーID）</label>
-        <input id="plaio-userid" class="form-input" type="text" placeholder="yamada" value="yamada">
-      </div>
-      <div class="form-group">
-        <label class="form-label">パスワード</label>
-        <input id="plaio-password" class="form-input" type="text" placeholder="パスワードを設定" value="12345">
-      </div>
-      <button id="btn-create-account" class="btn-primary">PLAIOアカウントを作成する</button>
-    `;
     $('#btn-create-account').addEventListener('click', () => {
       STATE._plaioCredentials = {
         userId: $('#plaio-userid').value || 'yamada',
