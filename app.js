@@ -233,28 +233,8 @@ function renderLogin() {
   } else if (STATE.loginStep === 1) {
     card.innerHTML = `
       <div class="login-logo">PLAIO</div>
-      <div class="login-subtitle">アカウント情報を入力してください</div>
-      <div class="form-group">
-        <label class="form-label">お名前</label>
-        <input id="reg-name" class="form-input" type="text" placeholder="山田太郎" value="山田太郎">
-      </div>
-      <div class="form-group">
-        <label class="form-label">住所</label>
-        <input id="reg-address" class="form-input" type="text" placeholder="東京都渋谷区..." value="東京都渋谷区神宮前1-2-3">
-      </div>
-      <div class="form-group">
-        <label class="form-label">性別</label>
-        <select id="reg-gender" class="form-input">
-          <option value="男性" selected>男性</option>
-          <option value="女性">女性</option>
-          <option value="その他">その他</option>
-          <option value="回答しない">回答しない</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">生年月日</label>
-        <input id="reg-birthday" class="form-input" type="date" value="1990-05-15">
-      </div>
+      <div class="login-subtitle">PLAIOアカウントのID・パスワードを設定</div>
+      <p style="color:#6b7280;text-align:center;margin:4px 0 20px;font-size:13px;">このIDとパスワードでPLAIOにログインします。</p>
       <div class="form-group">
         <label class="form-label">ユーザーID</label>
         <input id="reg-userid" class="form-input" type="text" placeholder="yamada" value="yamada">
@@ -263,37 +243,44 @@ function renderLogin() {
         <label class="form-label">パスワード</label>
         <input id="reg-password" class="form-input" type="text" placeholder="パスワードを設定" value="12345">
       </div>
-      <button id="btn-register" class="btn-primary">アカウントを作成する</button>
+      <button id="btn-next-step" class="btn-primary">次へ</button>
     `;
-    $('#btn-register').addEventListener('click', () => {
-      STATE._regData = {
-        name: $('#reg-name').value || '山田太郎',
-        address: $('#reg-address').value || '東京都渋谷区神宮前1-2-3',
-        gender: $('#reg-gender').value || '男性',
-        birthday: $('#reg-birthday').value || '1990-05-15',
+    $('#btn-next-step').addEventListener('click', () => {
+      STATE._plaioCredentials = {
         userId: $('#reg-userid').value || 'yamada',
+        password: $('#reg-password').value || '12345',
       };
       STATE.loginStep = 2;
       renderLogin();
     });
   } else if (STATE.loginStep === 2) {
-    const regName = STATE._regData ? STATE._regData.name : '山田太郎';
     card.innerHTML = `
       <div class="login-logo">PLAIO</div>
-      <div class="login-complete-icon">✅</div>
-      <div class="login-subtitle">PLAIOアカウントが作成されました</div>
-      <p style="color:#6b7280;text-align:center;margin:8px 0 24px;">アカウント名: <strong>${regName}</strong><br>作成したアカウントにログインしてください。</p>
+      <div class="login-subtitle">お使いのサービスでログイン</div>
+      <p style="color:#6b7280;text-align:center;margin:4px 0 20px;font-size:13px;">お使いのサービスのID・パスワードを入力してください。<br>PLAIOアカウントに紐づけられます。</p>
       <div class="form-group">
-        <label class="form-label">ユーザーID</label>
-        <input id="login-userid" class="form-input" type="text" placeholder="ユーザーIDを入力">
+        <label class="form-label">サービス種別</label>
+        <select id="svc-type" class="form-input">
+          <option value="SIM">SIM</option>
+          <option value="WiMAX">WiMAX</option>
+          <option value="スマホケア">スマホケア</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">サービスID</label>
+        <input id="svc-userid" class="form-input" type="text" placeholder="サービスのID" value="sim_user01">
       </div>
       <div class="form-group">
         <label class="form-label">パスワード</label>
-        <input id="login-password" class="form-input" type="password" placeholder="パスワードを入力">
+        <input id="svc-password" class="form-input" type="text" placeholder="パスワード" value="12345">
       </div>
-      <button id="btn-do-login" class="btn-primary">ログインする</button>
+      <button id="btn-do-login" class="btn-primary">アカウントを作成して紐づける</button>
     `;
     $('#btn-do-login').addEventListener('click', () => {
+      STATE._serviceLogin = {
+        serviceType: $('#svc-type').value,
+        userId: $('#svc-userid').value,
+      };
       setupInitialService();
       location.hash = '#/dashboard';
     });
@@ -1317,7 +1304,7 @@ function renderServicePage(container, serviceType, cfg) {
     else { cfg.title = 'SIMサービス 商品ページ'; cfg.desc = 'PLAIO SIMの商品ページです'; }
   } else if (serviceType === 'WiMAX') {
     if (hasContracts) { cfg.title = 'WiMAX マイページ'; cfg.desc = 'PLAIO WiMAXのマイページが表示されます'; }
-    else { cfg.title = 'WiMAXの 商品ページ'; }
+    else { cfg.title = 'WiMAXの商品ページ'; }
   } else if (serviceType === 'スマホケア') {
     if (hasContracts) { cfg.title = 'スマホケア マイページ'; }
     else { cfg.title = 'スマホケア 商品ページ'; }
@@ -1406,9 +1393,7 @@ function renderServicePage(container, serviceType, cfg) {
   const heroP = container.querySelector('.svc-hero p');
   const savedTitle = cfg.title;
   const savedDesc = cfg.desc;
-  const productTitle = serviceType === 'SIM' ? 'SIMサービス 商品ページ'
-    : serviceType === 'WiMAX' ? 'WiMAXの 商品ページ'
-    : 'スマホケア 商品ページ';
+  const productTitle = '商品ページ';
   const productDesc = serviceType === 'SIM' ? 'PLAIO SIMの商品ページです'
     : serviceType === 'WiMAX' ? 'PLAIO WiMAXの商品ページです'
     : 'PLAIOスマホケアの商品ページです';

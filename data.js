@@ -221,17 +221,22 @@ function filterBilling(data, filter) {
 
 // ---- 初期セットアップ ---- //
 function setupInitialService() {
-  const reg = STATE._regData || {};
+  const plaio = STATE._plaioCredentials || {};
+  const svc   = STATE._serviceLogin || {};
+  const userId = plaio.userId || 'yamada';
   STATE.currentUser = {
-    name: reg.name || '山田太郎',
-    address: reg.address || '東京都渋谷区神宮前1-2-3',
-    gender: reg.gender || '男性',
-    birthday: reg.birthday || '1990-05-15',
-    userId: reg.userId || 'yamada_taro',
-    email: (reg.userId || 'yamada_taro') + '@example.com',
+    name:     '山田太郎',
+    userId:   userId,
+    email:    userId + '@example.com',
+    address:  '東京都渋谷区神宮前1-2-3',
+    gender:   '-',
+    birthday: '-',
   };
   STATE.loggedIn = true;
   STATE.accountCreated = true;
+  if (svc.serviceType) {
+    addMyServiceRandom(svc.serviceType);
+  }
 }
 
 // ---- ランダムプラン選択 ---- //
