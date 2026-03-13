@@ -1044,3 +1044,27 @@ input, select { font: inherit; }
   from { opacity: 0; transform: translateX(40px); }
   to { opacity: 1; transform: translateX(0); }
 }
+
+/* ---- プロフィールページ ---- */
+.profile-info {
+  display: flex; gap: 24px; padding: 16px; align-items: flex-start;
+}
+.profile-avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: linear-gradient(135deg, #6C5CE7, #a29bfe);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 900; flex-shrink: 0;
+}
+.profile-fields { flex: 1; }
+.profile-row {
+  display: flex; padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.profile-row:last-child { border-bottom: none; }
+.profile-label {
+  width: 140px; flex-shrink: 0;
+  font-size: 13px; font-weight: 600; color: #6b7280;
+}
+.profile-value {
+  font-size: 14px; font-weight: 500; color: #1f2937;
+}

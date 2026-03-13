@@ -54,6 +54,7 @@ const ROUTES = {
   'services-sim': renderServiceSIM,
   'services-wimax': renderServiceWiMAX,
   'services-care': renderServiceCare,
+  profile: renderProfile,
 };
 
 function navigate(route, params = {}) {
@@ -144,10 +145,10 @@ function renderSidebar() {
   sb.innerHTML = `
     <div class="sidebar-logo">PLAIO</div>
     <div class="sidebar-user">
-      <div class="sidebar-avatar">山</div>
+      <div class="sidebar-avatar">${STATE.currentUser ? STATE.currentUser.name[0] : '山'}</div>
       <div class="sidebar-user-info">
-        <div class="sidebar-user-name">山田太郎</div>
-        <div class="sidebar-user-email">yamada@example.com</div>
+        <div class="sidebar-user-name">${STATE.currentUser ? STATE.currentUser.name : '山田太郎'}</div>
+        <div class="sidebar-user-email">${STATE.currentUser ? STATE.currentUser.email : 'yamada@example.com'}</div>
       </div>
     </div>
     <nav class="sidebar-nav">
@@ -176,6 +177,9 @@ function renderSidebar() {
       <a href="#/family-group" data-route="family-group">
         <span class="nav-icon">👨‍👩‍👧</span>家族グループ
       </a>
+      <a href="#/profile" data-route="profile">
+        <span class="nav-icon">👤</span>プロフィール
+      </a>
     </nav>
     <div class="sidebar-logout">
       <button id="btn-logout"><span>🚪</span>ログアウト</button>
@@ -198,6 +202,8 @@ function renderSidebar() {
     STATE.loggedIn = false;
     STATE.accountCreated = false;
     STATE.loginStep = 0;
+    STATE.currentUser = null;
+    STATE._regData = null;
     STATE.myServices = { SIM: [], WiMAX: [], スマホケア: [] };
     STATE.familyGroups = [];
     STATE.familyMembers = [];
@@ -227,38 +233,67 @@ function renderLogin() {
   } else if (STATE.loginStep === 1) {
     card.innerHTML = `
       <div class="login-logo">PLAIO</div>
-      <div class="login-subtitle">持っているサービスのアカウントでログインしてください</div>
+      <div class="login-subtitle">アカウント情報を入力してください</div>
       <div class="form-group">
-        <label class="form-label">サービス選択</label>
-        <select id="svc-select" class="form-input">
-          <option value="SIM" selected>SIM</option>
-          <option value="WiMAX">WiMAX</option>
-          <option value="スマホケア">スマホケア</option>
+        <label class="form-label">お名前</label>
+        <input id="reg-name" class="form-input" type="text" placeholder="山田太郎" value="山田太郎">
+      </div>
+      <div class="form-group">
+        <label class="form-label">住所</label>
+        <input id="reg-address" class="form-input" type="text" placeholder="東京都渋谷区..." value="東京都渋谷区神宮前1-2-3">
+      </div>
+      <div class="form-group">
+        <label class="form-label">性別</label>
+        <select id="reg-gender" class="form-input">
+          <option value="男性" selected>男性</option>
+          <option value="女性">女性</option>
+          <option value="その他">その他</option>
+          <option value="回答しない">回答しない</option>
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">電話番号</label>
-        <input class="form-input" type="tel" placeholder="09012345678">
+        <label class="form-label">生年月日</label>
+        <input id="reg-birthday" class="form-input" type="date" value="1990-05-15">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ユーザーID</label>
+        <input id="reg-userid" class="form-input" type="text" placeholder="yamada_taro" value="yamada_taro">
       </div>
       <div class="form-group">
         <label class="form-label">パスワード</label>
-        <input class="form-input" type="password" placeholder="パスワードを入力">
+        <input id="reg-password" class="form-input" type="password" placeholder="パスワードを設定" value="password123">
       </div>
-      <button id="btn-svc-login" class="btn-primary">ログインしてアカウントを作る</button>
+      <button id="btn-register" class="btn-primary">アカウントを作成する</button>
     `;
-    $('#btn-svc-login').addEventListener('click', () => {
+    $('#btn-register').addEventListener('click', () => {
+      STATE._regData = {
+        name: $('#reg-name').value || '山田太郎',
+        address: $('#reg-address').value || '東京都渋谷区神宮前1-2-3',
+        gender: $('#reg-gender').value || '男性',
+        birthday: $('#reg-birthday').value || '1990-05-15',
+        userId: $('#reg-userid').value || 'yamada_taro',
+      };
       STATE.loginStep = 2;
       renderLogin();
     });
   } else if (STATE.loginStep === 2) {
+    const regName = STATE._regData ? STATE._regData.name : '山田太郎';
     card.innerHTML = `
       <div class="login-logo">PLAIO</div>
       <div class="login-complete-icon">✅</div>
       <div class="login-subtitle">PLAIOアカウントが作成されました</div>
-      <p style="color:#6b7280;text-align:center;margin:8px 0 24px;">センターモバイル 音声SIM 20GB が紐づけられました。<br>アカウント名: <strong>山田太郎</strong></p>
-      <button id="btn-goto-dash" class="btn-primary">マイページへ進む</button>
+      <p style="color:#6b7280;text-align:center;margin:8px 0 24px;">アカウント名: <strong>${regName}</strong><br>作成したアカウントにログインしてください。</p>
+      <div class="form-group">
+        <label class="form-label">ユーザーID</label>
+        <input id="login-userid" class="form-input" type="text" placeholder="ユーザーIDを入力">
+      </div>
+      <div class="form-group">
+        <label class="form-label">パスワード</label>
+        <input id="login-password" class="form-input" type="password" placeholder="パスワードを入力">
+      </div>
+      <button id="btn-do-login" class="btn-primary">ログインする</button>
     `;
-    $('#btn-goto-dash').addEventListener('click', () => {
+    $('#btn-do-login').addEventListener('click', () => {
       setupInitialService();
       location.hash = '#/dashboard';
     });
@@ -810,6 +845,30 @@ function renderPointsMember(container, memberId) {
 }
 
 /* ============================================================
+   プロフィールページ
+   ============================================================ */
+function renderProfile(container) {
+  const u = STATE.currentUser || {};
+  const birthdayDisplay = u.birthday ? u.birthday.replace(/-/g, '/') : '';
+  container.innerHTML = `
+    <div class="section-card" style="margin-bottom:24px;">
+      <div class="section-card-header"><span>👤</span>プロフィール情報</div>
+      <div class="profile-info">
+        <div class="profile-avatar">${u.name ? u.name[0] : '山'}</div>
+        <div class="profile-fields">
+          <div class="profile-row"><span class="profile-label">お名前</span><span class="profile-value">${u.name || '-'}</span></div>
+          <div class="profile-row"><span class="profile-label">ユーザーID</span><span class="profile-value">${u.userId || '-'}</span></div>
+          <div class="profile-row"><span class="profile-label">メールアドレス</span><span class="profile-value">${u.email || '-'}</span></div>
+          <div class="profile-row"><span class="profile-label">住所</span><span class="profile-value">${u.address || '-'}</span></div>
+          <div class="profile-row"><span class="profile-label">性別</span><span class="profile-value">${u.gender || '-'}</span></div>
+          <div class="profile-row"><span class="profile-label">生年月日</span><span class="profile-value">${birthdayDisplay || '-'}</span></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================
    【修正2】サービス紐づけ — 横並びカード + ランダムプラン
    【修正7】SIMボーナスポイント付与を削除
    ============================================================ */
@@ -1255,6 +1314,7 @@ function renderServicePage(container, serviceType, cfg) {
   // 【修正3】タイトル・説明文を上書き
   if (serviceType === 'SIM') {
     if (hasContracts) { cfg.title = 'SIMサービス マイページ'; cfg.desc = 'PLAIO SIMのサービスのマイページです'; }
+    else { cfg.title = 'SIMサービス 商品ページ'; cfg.desc = 'PLAIO SIMの商品ページです'; }
   } else if (serviceType === 'WiMAX') {
     if (hasContracts) { cfg.title = 'WiMAX マイページ'; cfg.desc = 'PLAIO WiMAXのマイページが表示されます'; }
     else { cfg.title = 'WiMAXの 商品ページ'; }

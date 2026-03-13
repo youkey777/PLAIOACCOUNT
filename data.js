@@ -221,9 +221,15 @@ function filterBilling(data, filter) {
 
 // ---- 初期セットアップ ---- //
 function setupInitialService() {
-  const plan = PLANS.SIM.voice.find(p => p.id === 'voice-20');
-  STATE.myServices.SIM.push(createServiceEntry('SIM', plan, '2025年9月1日'));
-  STATE.currentUser = { name: '山田太郎', email: 'yamada@example.com' };
+  const reg = STATE._regData || {};
+  STATE.currentUser = {
+    name: reg.name || '山田太郎',
+    address: reg.address || '東京都渋谷区神宮前1-2-3',
+    gender: reg.gender || '男性',
+    birthday: reg.birthday || '1990-05-15',
+    userId: reg.userId || 'yamada_taro',
+    email: (reg.userId || 'yamada_taro') + '@example.com',
+  };
   STATE.loggedIn = true;
   STATE.accountCreated = true;
 }
