@@ -1257,7 +1257,7 @@ function renderServicePage(container, serviceType, cfg) {
     if (hasContracts) { cfg.title = 'SIMサービス マイページ'; cfg.desc = 'PLAIO SIMのサービスのマイページです'; }
   } else if (serviceType === 'WiMAX') {
     if (hasContracts) { cfg.title = 'WiMAX マイページ'; cfg.desc = 'PLAIO WiMAXのマイページが表示されます'; }
-    else { cfg.title = 'WiMAXの販売サービス 商品ページ'; }
+    else { cfg.title = 'WiMAXの 商品ページ'; }
   } else if (serviceType === 'スマホケア') {
     if (hasContracts) { cfg.title = 'スマホケア マイページ'; }
     else { cfg.title = 'スマホケア 商品ページ'; }
@@ -1342,15 +1342,30 @@ function renderServicePage(container, serviceType, cfg) {
   }
 
   // 【修正15】商品ページリンク — 全サービス同一タブ内表示（契約済み時のみ）
+  const heroH2 = container.querySelector('.svc-hero h2');
+  const heroP = container.querySelector('.svc-hero p');
+  const savedTitle = cfg.title;
+  const savedDesc = cfg.desc;
+  const productTitle = serviceType === 'SIM' ? 'SIMサービス 商品ページ'
+    : serviceType === 'WiMAX' ? 'WiMAXの 商品ページ'
+    : 'スマホケア 商品ページ';
+  const productDesc = serviceType === 'SIM' ? 'PLAIO SIMの商品ページです'
+    : serviceType === 'WiMAX' ? 'PLAIO WiMAXの商品ページです'
+    : 'PLAIOスマホケアの商品ページです';
+
   const lnkProduct = container.querySelector('#lnk-product-page');
   if (lnkProduct) lnkProduct.onclick = () => {
     contentArea.innerHTML = '';
     cfg.productPage(contentArea);
+    if (heroH2) heroH2.textContent = productTitle;
+    if (heroP) heroP.textContent = productDesc;
     if (hasContracts) {
       const backLink = el('div', '', `<a href="javascript:void(0)" class="back-link lnk-back-mypage">← マイページに戻る</a>`);
       contentArea.prepend(backLink);
       contentArea.querySelector('.lnk-back-mypage').onclick = () => {
         contentArea.innerHTML = '';
+        if (heroH2) heroH2.textContent = savedTitle;
+        if (heroP) heroP.textContent = savedDesc;
         if (allContracts.length > 0) {
           renderContractView(contentArea, allContracts[0].member, serviceType, cfg, allContracts[0].idx);
         }
